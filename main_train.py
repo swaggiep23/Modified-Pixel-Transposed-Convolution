@@ -14,7 +14,7 @@ from utils.display_utils import *
 from config_and_params import *
 
 
-def main_train(model_num, EPOCHS):
+def main_train(model_num, EPOCHS, learn_r):
     if model_num == 0:
         model = UNet_model(train_batches, validation_batches, input_shape, output_classes, 
                             cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
@@ -57,8 +57,8 @@ if __name__ == '__main__':
                 model_num = int(currentValue)
             elif currentArgument in ("-e", "--epochs"):
                 EPOCHS = int(currentValue)
-
-        main_train(model_num, EPOCHS)
+                learn_r = 1e-3
+        main_train(model_num, EPOCHS, learn_r)
                 
     except getopt.error as err:
         # output error, and return with an error code

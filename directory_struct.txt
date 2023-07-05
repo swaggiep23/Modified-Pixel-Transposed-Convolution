@@ -1,5 +1,3 @@
-Folder PATH listing for volume Windows
-Volume serial number is 3CBB-020F
 C:.
 ├───analogous_ipynb_notebook
 ├───dataset_1

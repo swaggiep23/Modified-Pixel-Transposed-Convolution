@@ -1,0 +1,7 @@
+focal_loss==0.0.7
+keras==2.11.0
+matplotlib==3.6.3
+protobuf==3.19.6
+tensorboard==2.11.2
+tensorflow==2.11.0
+tensorflow_datasets==4.8.1

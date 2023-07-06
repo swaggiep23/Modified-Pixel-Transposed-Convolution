@@ -142,7 +142,7 @@ class compile_and_train_model:
     cl_type: (Integer)
         0 for normal convolution, 1 for ipixel convolution.
         
-    dcl_type:(Integer) 
+    tcl_type:(Integer) 
         0 for Regular deconv, 1 for Pixel deconv, 2 for iPixel deconv.
         
     model_summary:(Boolean) 
@@ -173,7 +173,7 @@ class compile_and_train_model:
     def __init__(self, TRAIN_LENGTH, VAL_LENGTH, train_batches, 
                  validation_batches, BATCH_SIZE, EPOCHS, VAL_SUBSPLITS, 
                  output_classes, input_shape, filter_init, network_depth,
-                 dcl_type, model_summary, dense_layers, growth_rate,
+                 tcl_type, model_summary, dense_layers, growth_rate,
                  dropout, conv_option, pool_option, pyramid_layers,
                  model_select, cwd, model_name, d_format='NHWC'):
 
@@ -185,7 +185,7 @@ class compile_and_train_model:
         self.input_shape = input_shape
         self.filter_init = filter_init
         self.network_depth = network_depth
-        self.dcl_type = dcl_type
+        self.tcl_type = tcl_type
         self.model_summary = model_summary
         self.dense_layers = dense_layers
         self.growth_rate = growth_rate
@@ -220,7 +220,7 @@ class compile_and_train_model:
 #                               sm.losses.categorical_focal_jaccard_loss]
             metrics_to_compile = ['accuracy', self.miou]
             model = modelClass(self.input_shape, self.network_depth, 
-                               self.dcl_type, self.output_classes, 
+                               self.tcl_type, self.output_classes, 
                                self.filter_init, self.dense_layers, 
                                self.growth_rate, self.dropout, 
                                self.conv_option, self.pool_option, 

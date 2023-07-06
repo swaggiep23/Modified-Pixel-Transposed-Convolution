@@ -6,7 +6,7 @@ from model_and_training.model_utilfuncs import *
 
 
 class modelClass:
-    def __init__(self, input_shape, network_depth, dcl_type, 
+    def __init__(self, input_shape, network_depth, tcl_type, 
                  out_classnum, filtersize, dense_layers, growth_rate, 
                  dropout, conv_option, pool_option, pyramid_layers,
                  d_format='NHWC'):
@@ -25,7 +25,7 @@ class modelClass:
         cl_type: (String) 
             'builtin' for normal convolution, 'ipixel' for ipixel convolution.
 
-        dcl_type: (String) 
+        tcl_type: (String) 
             'builtin' for normal deconvolution, 'pixel' for pixel deconvolution,
             'ipixel' ipixel deconvolution.
 
@@ -61,7 +61,7 @@ class modelClass:
         """
         self.input_shape = input_shape
         self.network_depth = network_depth
-        self.dcl_type = dcl_type
+        self.tcl_type = tcl_type
         self.out_classnum = out_classnum
         self.filtersize = filtersize
         self.dense_layers = dense_layers
@@ -105,19 +105,19 @@ class modelClass:
         conv = downsample2_op(conv_option, pool_option)(num_outputs)(conv)
         return conv
 
-    def TransitionUp(self, inputs, dcl_type, num_outputs, conv_option,  
+    def TransitionUp(self, inputs, tcl_type, num_outputs, conv_option,  
                      kernel_size_u, upsample_rate):
-        if dcl_type == 'builtin':
+        if tcl_type == 'builtin':
             convt = layers.Conv2DTranspose(num_outputs, upsample_rate, 
                                            strides=upsample_rate, padding='same',
                                            kernel_initializer='he_uniform')(inputs)
 #             convt = layers.UpSampling2D(size=upsample_rate, data_format="channels_last", 
 #                                         interpolation="bilinear")(inputs)
-        elif dcl_type == 'ipixel' or dcl_type == 'pixel':
-            convt = customDCL(dcl_type, num_outputs, kernel_size_u, upsample_rate,
+        elif tcl_type == 'ipixel' or tcl_type == 'pixel':
+            convt = customTCL(tcl_type, num_outputs, kernel_size_u, upsample_rate,
                               conv_option, d_format='NHWC')(inputs)
-        elif dcl_type == 'modified ipixel':
-            convt = customDCL2(dcl_type, num_outputs, kernel_size_u, upsample_rate, 
+        elif tcl_type == 'modified ipixel':
+            convt = customTCL2(tcl_type, num_outputs, kernel_size_u, upsample_rate, 
                                conv_option, d_format='NHWC')(inputs)
         return convt
 
@@ -181,7 +181,7 @@ class modelClass:
         return layer_out
 
     def up_block_pixel(self, inputs, down_outputs, kernel_size_u, 
-                       kernel_size_u2, channel_axis, out_classnum, dcl_type, 
+                       kernel_size_u2, channel_axis, out_classnum, tcl_type, 
                        dense_layers, layer_index, growth_rate, dropout,
                        conv_option, isFinal=False):
         """
@@ -214,14 +214,14 @@ class modelClass:
         input_channels = inputs.shape[channel_axis]
         upsample_rate = 2
         convt = self.TransitionUp(inputs, 
-                                  dcl_type,
+                                  tcl_type,
                                   input_channels, 
                                   conv_option,
                                   kernel_size_u, 
                                   upsample_rate)
         convt = layers.concatenate([convt, down_outputs[layer_index]], axis=channel_axis)
 #         convt = self.TransitionUp(inputs, 
-#                                   dcl_type, 
+#                                   tcl_type, 
 #                                   down_outputs[layer_index].shape[channel_axis],
 #                                   conv_option,
 #                                   kernel_size_u, 
@@ -287,7 +287,7 @@ class modelClass:
         return layer_out
 
     def up_block_regular(self, inputs, down_outputs, kernel_size_u, 
-                         kernel_size_u2, channel_axis, out_classnum, dcl_type, 
+                         kernel_size_u2, channel_axis, out_classnum, tcl_type, 
                          dense_layers, layer_index, growth_rate, dropout,
                          conv_option, isFinal=False):
         """
@@ -320,14 +320,14 @@ class modelClass:
         input_channels = inputs.shape[channel_axis]
         upsample_rate = 2
         convt = self.TransitionUp(inputs, 
-                                  dcl_type, 
+                                  tcl_type, 
                                   input_channels, 
                                   conv_option,
                                   kernel_size_u, 
                                   upsample_rate)
         convt = layers.concatenate([convt, down_outputs[layer_index]], axis=channel_axis)
 #         convt = self.TransitionUp(inputs, 
-#                                   dcl_type, 
+#                                   tcl_type, 
 #                                   down_outputs[layer_index].shape[channel_axis],
 #                                   conv_option,
 #                                   kernel_size_u, 
@@ -385,7 +385,7 @@ class modelClass:
                 outputs = self.up_block_regular(outputs, down_outputs, 
                                                 kernel_size_u, kernel_size_u2,
                                                 channel_axis, self.out_classnum,
-                                                self.dcl_type, self.dense_layers,
+                                                self.tcl_type, self.dense_layers,
                                                 layer_index, self.growth_rate,
                                                 self.dropout, self.conv_option,
                                                 isFinal=isFinal)
@@ -393,7 +393,7 @@ class modelClass:
                 outputs = self.up_block_pixel(outputs, down_outputs, 
                                               kernel_size_u, kernel_size_u2,
                                               channel_axis, self.out_classnum,
-                                              self.dcl_type, self.dense_layers,
+                                              self.tcl_type, self.dense_layers,
                                               layer_index, self.growth_rate,
                                               self.dropout, self.conv_option,
                                               isFinal=isFinal)

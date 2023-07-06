@@ -11,7 +11,7 @@ def UNet_model(train_batches, validation_batches, input_shape, output_classes,
                cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
                VAL_SUBSPLITS, EPOCHS):
 
-    dcl_type = 'ipixel'
+    tcl_type = 'ipixel'
     conv_option = 'sepconv2d'
     pool_option = 'conv'
     model_summary = False
@@ -34,7 +34,7 @@ def UNet_model(train_batches, validation_batches, input_shape, output_classes,
                                     BATCH_SIZE, EPOCHS, 
                                     VAL_SUBSPLITS, output_classes,
                                     input_shape, filter_init,
-                                    network_depth, dcl_type, 
+                                    network_depth, tcl_type, 
                                     model_summary, dense_layers,
                                     growth_rate, dropout,
                                     conv_option, pool_option,
@@ -48,7 +48,7 @@ def PixelDenseNet(train_batches, validation_batches, input_shape, output_classes
                   cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
                   VAL_SUBSPLITS, EPOCHS):
 
-    dcl_type = 'pixel'
+    tcl_type = 'pixel'
     conv_option = 'sepconv2d'
     pool_option = 'conv'
     model_summary = False
@@ -71,7 +71,7 @@ def PixelDenseNet(train_batches, validation_batches, input_shape, output_classes
                                     BATCH_SIZE, EPOCHS, 
                                     VAL_SUBSPLITS, output_classes,
                                     input_shape, filter_init,
-                                    network_depth, dcl_type, 
+                                    network_depth, tcl_type, 
                                     model_summary, dense_layers,
                                     growth_rate, dropout,
                                     conv_option, pool_option,
@@ -85,7 +85,7 @@ def iPixelDenseNet(train_batches, validation_batches, input_shape, output_classe
                    cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
                    VAL_SUBSPLITS, EPOCHS):
 
-    dcl_type = 'ipixel'
+    tcl_type = 'ipixel'
     conv_option = 'sepconv2d'
     pool_option = 'conv'
     model_summary = False
@@ -108,7 +108,7 @@ def iPixelDenseNet(train_batches, validation_batches, input_shape, output_classe
                                     BATCH_SIZE, EPOCHS, 
                                     VAL_SUBSPLITS, output_classes,
                                     input_shape, filter_init,
-                                    network_depth, dcl_type, 
+                                    network_depth, tcl_type, 
                                     model_summary, dense_layers,
                                     growth_rate, dropout,
                                     conv_option, pool_option,
@@ -122,7 +122,7 @@ def modifiediPixelDenseNet(train_batches, validation_batches, input_shape, outpu
                            cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
                            VAL_SUBSPLITS, EPOCHS):
 
-    dcl_type = 'modified ipixel'
+    tcl_type = 'modified ipixel'
     conv_option = 'sepconv2d'
     pool_option = 'conv'
     model_summary = False
@@ -145,7 +145,7 @@ def modifiediPixelDenseNet(train_batches, validation_batches, input_shape, outpu
                                     BATCH_SIZE, EPOCHS, 
                                     VAL_SUBSPLITS, output_classes,
                                     input_shape, filter_init,
-                                    network_depth, dcl_type, 
+                                    network_depth, tcl_type, 
                                     model_summary, dense_layers,
                                     growth_rate, dropout,
                                     conv_option, pool_option,
@@ -159,7 +159,7 @@ def Deeplab(train_batches, validation_batches, input_shape, output_classes,
             cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
             VAL_SUBSPLITS, EPOCHS):
 
-    dcl_type = 'modified ipixel'
+    tcl_type = 'modified ipixel'
     conv_option = 'sepconv2d'
     pool_option = 'conv'
     model_summary = False
@@ -182,7 +182,7 @@ def Deeplab(train_batches, validation_batches, input_shape, output_classes,
                                     BATCH_SIZE, EPOCHS, 
                                     VAL_SUBSPLITS, output_classes,
                                     input_shape, filter_init,
-                                    network_depth, dcl_type, 
+                                    network_depth, tcl_type, 
                                     model_summary, dense_layers,
                                     growth_rate, dropout,
                                     conv_option, pool_option,

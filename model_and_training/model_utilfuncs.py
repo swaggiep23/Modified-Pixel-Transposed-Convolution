@@ -285,12 +285,12 @@ def downsample2_op(conv_option, pool_option):
     return downsample_in
 
 
-class customDCL:
+class customTCL:
     """
     Upsamples the input by 'upsample_rate' using the methods discussed in:
     https://arxiv.org/pdf/1705.06820.pdf
     """
-    def __init__(self, dcl_type, out_num, kernel_size, 
+    def __init__(self, tcl_type, out_num, kernel_size, 
                  upsample_rate, conv_option, d_format='NHWC'):
         """
         *****************
@@ -307,7 +307,7 @@ class customDCL:
         kernel_size: (2-tuple of integers)
             Convolutional kernel size.
         """
-        self.dcl_type = dcl_type
+        self.tcl_type = tcl_type
         self.out_num = out_num
         self.kernel_size = kernel_size
         self.upsample_rate = upsample_rate
@@ -315,7 +315,7 @@ class customDCL:
         self.d_format = d_format
         self.image_dim = 2
         
-    def DCL(self, inputs):
+    def TCL(self, inputs):
         axis =  (self.d_format.index('H'), self.d_format.index('W'))
         channel_axis = self.d_format.index('C')
         loop_inputs = inputs
@@ -331,7 +331,7 @@ class customDCL:
                                                  row_index, 
                                                  column_index,
                                                  self.upsample_rate)(conv))
-            loop_inputs = conv if index==0 and self.dcl_type == 'pixel' \
+            loop_inputs = conv if index==0 and self.tcl_type == 'pixel' \
                           else layers.concatenate([loop_inputs, conv],
                                                   axis=channel_axis)
         outputs = tf.add_n(dilated_outputs)
@@ -347,16 +347,16 @@ class customDCL:
             Output tensor, with the dimensions.
             (batch_size, upsample_rate*input_height, upsample_rate*input_width, out_num)
         """
-        return self.DCL(inputs)
+        return self.TCL(inputs)
 
 
-class customDCL2:
+class customTCL2:
     """
-    Upsamples the input by 'upsample_rate', similar to `customDCL`, 
-    except in this case all of the convolutions are independent of each other, unlike customDCL where 
+    Upsamples the input by 'upsample_rate', similar to `customTCL`, 
+    except in this case all of the convolutions are independent of each other, unlike customTCL where 
     all of the operations are sequential.
     """
-    def __init__(self, dcl_type, out_num, kernel_size, 
+    def __init__(self, tcl_type, out_num, kernel_size, 
                  upsample_rate, conv_option, d_format='NHWC'):
         """
         *****************
@@ -373,7 +373,7 @@ class customDCL2:
         kernel_size: (2-tuple of integers)
             Convolutional kernel size.
         """
-        self.dcl_type = dcl_type
+        self.tcl_type = tcl_type
         self.out_num = out_num
         self.kernel_size = kernel_size
         self.upsample_rate = upsample_rate
@@ -381,7 +381,7 @@ class customDCL2:
         self.d_format = d_format
         self.image_dim = 2
         
-    def DCL(self, inputs):
+    def TCL(self, inputs):
         axis =  (self.d_format.index('H'), self.d_format.index('W'))
         channel_axis = self.d_format.index('C')
         loop_inputs = inputs
@@ -410,4 +410,4 @@ class customDCL2:
             Output tensor, with the dimensions.
             (batch_size, upsample_rate*input_height, upsample_rate*input_width, out_num)
         """
-        return self.DCL(inputs)
+        return self.TCL(inputs)

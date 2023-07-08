@@ -15,7 +15,7 @@ def UNet_model(train_batches, validation_batches, input_shape, output_classes,
     conv_option = 'sepconv2d'
     pool_option = 'conv'
     model_summary = False
-    network_depth = 2
+    network_depth = 5
     filter_init = 2**6
     growth_rate = 2**4
     dropout = 0.2

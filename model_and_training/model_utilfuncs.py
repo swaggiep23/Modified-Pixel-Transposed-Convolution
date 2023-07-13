@@ -72,7 +72,8 @@ class adsConv2D(keras.layers.Layer):
                         "padding": self.padding,
                         "strides": self.strides,
                         "activation": self.activation,
-                        "dilation_rate": self.dilation_rate
+                        "dilation_rate": self.dilation_rate,
+                        "kernel_initializer": self.kernel_initializer
                      })
         return config
 

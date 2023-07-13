@@ -59,3 +59,5 @@ elif dataset_select == 'voc':
     val_txt_path = os.path.join(cwd2, f"DatasetInfo", f"val.txt")
     input_shape = (128, 128, 3) # input_height, input_width, input_channels
     output_classes = 21
+
+VAL_SUBSPLITS = 5

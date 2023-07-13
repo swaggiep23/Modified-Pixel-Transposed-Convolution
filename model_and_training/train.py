@@ -25,8 +25,8 @@ class mod_MeanIoU(tf.keras.metrics.MeanIoU):
     """
     def __init__(self, y_true=None, y_pred=None, num_classes=None,
                  name=None, dtype=None):
-        super(mod_MeanIoU, self).__init__(num_classes=num_classes,
-                                      name=name, dtype=dtype)
+        super().__init__(num_classes=num_classes, name=name, dtype=dtype)
+        self.num_classes = num_classes
 
     def update_state(self, y_true, y_pred, sample_weight=None):
         y_pred = tf.math.argmax(y_pred, axis=-1)
@@ -35,9 +35,7 @@ class mod_MeanIoU(tf.keras.metrics.MeanIoU):
     def get_config(self):
         config = super().get_config()
         config.update({
-                       "num_classes": self.num_classes,
-                       "name": self.name,
-                       "dtype": self.dtype                    
+                       "num_classes": self.num_classes,                 
                        })
 
         return config
@@ -49,7 +47,7 @@ class AsymmetricLoss(tf.keras.losses.Loss):
     """
     def __init__(self, from_logits=False, gamma_neg=4.0, gamma_pos=1.0, 
                  clip=0.10, eps=1e-6):
-        super(AsymmetricLoss, self).__init__()
+        super().__init__()
         self.from_logits = from_logits
         self.gamma_neg = gamma_neg
         self.gamma_pos = gamma_pos
@@ -232,11 +230,11 @@ class compile_and_train_model:
         if self.model_summary:
             model.summary()
             try:
-                image_file_path = os.path.join(cwd, f'model_schematics', f'{self.model_name}',
+                image_file_path = os.path.join(cwd, f'model_details', f'model_schematics', f'{self.model_name}',
                                                f'{self.model_name}.png')
                 tf.keras.utils.plot_model(model, to_file=image_file_path, show_shapes=False)
             except:
-                image_file_path = os.path.join(cwd, f'model_schematics', f'{self.model_name}',
+                image_file_path = os.path.join(cwd, f'model_details', f'model_schematics', f'{self.model_name}',
                                                f'{self.model_name}.png')
                 os.makedirs(os.path.dirname(image_file_path))
                 tf.keras.utils.plot_model(model, to_file=image_file_path, show_shapes=False)
@@ -244,7 +242,7 @@ class compile_and_train_model:
         self.model = model
 
     def train_model(self, image_list, cwd, learn_r):
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d--%H-%M-%S")
+        timestamp = datetime.datetime.now().strftime("%d-%m-%Y--%H-%M-%S")
         callback = [DisplayCallback(image_list, self.model, self.model_name, self.cwd),
                     keras.callbacks.LearningRateScheduler(functools.partial(lr_scheduler,
                                                                             lr_init=learn_r,
@@ -294,7 +292,7 @@ class compile_and_train_model:
             # plt.ylim([0, 1])
             plt.legend()
             plt.subplots_adjust(top=0.92, bottom=0.11, left=0.125, right=0.93, hspace=0.6, wspace=0.2)
-        fig_path = os.path.join(self.cwd, 'training_plots', f'{self.model_name}',
+        fig_path = os.path.join(self.cwd, f'results', f'training_plots', f'{self.model_name}',
                         f'{self.model_name} - Training Metrics vs Epochs.png')
         try:
             plt.savefig(fig_path)
@@ -311,15 +309,17 @@ class compile_and_train_model:
         self.plot_train_results()
         show_predictions('Predictions after training', self.model_name, image_list, self.model, 
                          self.cwd, dataset=self.validation_batches, mode=2, num=3)
-        model_checkpt_path = os.path.join(cwd, f'saved_model', f'{self.model_name}', f'saved_weights',
-                                          f'{self.model_name}_weights.ckpt')
-        complete_model_path = os.path.join(cwd, f'saved_model', f'{self.model_name}', f'saved_complete_model')
+        # model_checkpt_path = os.path.join(cwd, f'model_details', f'saved_model', 
+        #                                   f'{self.model_name}', f'saved_weights',
+        #                                   f'{self.model_name}_weights.ckpt')
+        complete_model_path = os.path.join(cwd, f'model_details', f'saved_model', 
+                                           f'{self.model_name}', f'saved_complete_model')
         self.model.evaluate(self.validation_batches)
         try:
-            self.model.save_weights(model_checkpt_path)
+            # self.model.save_weights(model_checkpt_path)
             self.model.save(complete_model_path)
         except:
-            os.makedirs(os.path.dirname(model_checkpt_path))
+            # os.makedirs(os.path.dirname(model_checkpt_path))
+            # self.model.save_weights(model_checkpt_path)
             os.makedirs(os.path.dirname(complete_model_path))
-            self.model.save_weights(model_checkpt_path)
             self.model.save(complete_model_path)

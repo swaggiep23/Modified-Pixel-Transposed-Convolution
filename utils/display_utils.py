@@ -6,7 +6,7 @@ from config_and_params import *
 
 class DisplayCallback(tf.keras.callbacks.Callback):
     def __init__(self, image_list, model, model_name, cwd):
-        super(DisplayCallback, self).__init__()
+        super().__init__()
         # self.validation_data = None
         # self.model = None
         # self._chief_worker_only = None
@@ -21,6 +21,17 @@ class DisplayCallback(tf.keras.callbacks.Callback):
         show_predictions(epoch, self.model_name, self.image_list, self.model,
                          self.cwd, mode=1, num=3)
         print('\nSample Prediction after epoch {}\n'.format(epoch+1))
+    
+    def get_config(self):
+        config = super().get_config()
+        config.update({
+                       "image_list": self.image_list,
+                       "model": self.model,
+                       "model_name": self.model_name,
+                       "cwd": self.cwd                    
+                       })
+
+        return config
 
 
 def lr_scheduler(epoch, lr, lr_init, max_epochs):
@@ -39,7 +50,7 @@ def create_mask(pred_mask):
 
 
 def show_predictions(epoch, model_name, image_list, model, cwd,
-                     mode=0, dataset=None, num=1):
+                     mode=0, dataset=None, num=1, WIDTH=8, HEIGHT=8):
     """
     *****************
     *** Arguments ***
@@ -66,7 +77,7 @@ def show_predictions(epoch, model_name, image_list, model, cwd,
     if dataset:
         imgs_masks_and_preds = []
         if mode == 3:
-            for image, mask in dataset.take(num):
+            for image in dataset.take(num):
                 imgs_masks_and_preds.append(image[0])
                 pred_mask = model.predict(image)
                 imgs_masks_and_preds.append(create_mask(pred_mask))  
@@ -87,11 +98,11 @@ def show_predictions(epoch, model_name, image_list, model, cwd,
             pred_mask = model.predict(image_list[index][tf.newaxis, ...])
             imgs_masks_and_preds.append(create_mask(pred_mask))
     display(epoch, model_name, imgs_masks_and_preds, num,
-            cwd, mode)
+            cwd, mode, WIDTH, HEIGHT)
     
             
 def display(epoch, model_name, display_list, num_subplts, 
-            cwd, mode=0):
+            cwd, mode=0, WIDTH=8, HEIGHT=8):
     """
     *****************
     *** Arguments ***
@@ -116,9 +127,8 @@ def display(epoch, model_name, display_list, num_subplts,
     title_train = ['Input Image', 'True Mask', 'Predicted Mask']
     title_test = ['Input Image', 'Predicted Mask']
     num_cols = int(len(display_list)/num_subplts)
-    WIDTH_SIZE = 8
-    HEIGHT_SIZE = 8
-    f, axes = plt.subplots(num_subplts, num_cols, facecolor='black', figsize=(WIDTH_SIZE,HEIGHT_SIZE))
+
+    f, axes = plt.subplots(num_subplts, num_cols, facecolor='black', figsize=(WIDTH,HEIGHT))
 
     for i in range(len(display_list)):
         ax = plt.subplot(num_subplts, num_cols, i+1, facecolor='black')
@@ -145,24 +155,23 @@ def display(epoch, model_name, display_list, num_subplts,
     if type(epoch) is bool or type(epoch) is str:
         f.suptitle(f'{epoch}', color='white')
         if mode == 3:
-            fig_path = os.path.join(cwd, f'test_sample_results', f'{model_name}',
-                                    f'Test Data Result.png')
+            fig_path = os.path.join(cwd, f'results', f'test_sample_results', f'{model_name}',
+                                    f'{epoch}.png')
             try:
                 plt.savefig(fig_path)
             except:
                 os.makedirs(os.path.dirname(fig_path))
                 plt.savefig(fig_path)
-
         elif mode == 2:
-            fig_path = os.path.join(cwd, f'validation_sample_results', f'{model_name}', 
-                                    f'Validation Data Result.png')
+            fig_path = os.path.join(cwd, f'results', f'validation_sample_results', f'{model_name}', 
+                                    f'{epoch}.png')
             try:
                 plt.savefig(fig_path)
             except:
                 os.makedirs(os.path.dirname(fig_path))
                 plt.savefig(fig_path)
         elif mode == 1:
-            fig_path = os.path.join(cwd, f'training_sample_results', f'{model_name}',
+            fig_path = os.path.join(cwd, f'results', f'training_sample_results', f'{model_name}',
                                     f'{epoch}.png')
             try:
                 plt.savefig(fig_path)
@@ -172,14 +181,26 @@ def display(epoch, model_name, display_list, num_subplts,
     else:
         f.suptitle(f'Epoch {epoch+1}', color='white')
         if mode == 1:
-            fig_path = os.path.join(cwd, f'training_sample_results', f'{model_name}', 
+            fig_path = os.path.join(cwd, f'results', f'training_sample_results', f'{model_name}', 
                                     f'Epoch - {epoch+1}.png')
             try:
                 plt.savefig(fig_path)
             except:
                 os.makedirs(os.path.dirname(fig_path))
                 plt.savefig(fig_path)
-    
     # plt.show()
+    plt.close()
+
+
+def display_test(pred_batches, PRED_LENGTH, loaded_model, model_num):
+    imgs_masks_and_preds = []
+    for image in pred_batches.take(PRED_LENGTH):
+        pred_mask = loaded_model.predict(image)
+        imgs_masks_and_preds.append((image[0], create_mask(pred_mask)))
+
+    for index, (image, pred) in enumerate(imgs_masks_and_preds):
+        display(f'Test Result {index+1} - Model {model_num}', f'model_{model_num}', [image, pred], 1,
+                cwd, mode=3, WIDTH=8, HEIGHT=8)
+
     
             

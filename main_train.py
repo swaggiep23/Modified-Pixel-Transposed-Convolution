@@ -15,6 +15,25 @@ from config_and_params import *
 
 
 def main_train(model_num, EPOCHS, learn_r):
+    (train_batches,
+    validation_batches, 
+    TRAIN_LENGTH, 
+    VAL_LENGTH) = load_and_split_dataset(
+        BATCH_SIZE, 
+        BUFFER_SIZE, 
+        load_from_tfds, 
+        img_dir, 
+        mask_dir, 
+        train_txt_path, 
+        val_txt_path, 
+        input_shape[:-1]
+        )
+    samples = []
+    for images, masks in train_batches.take(3):
+        samples.append(images[0])
+        samples.append(masks[0])
+    display('Dataset Sample', 'no_models', samples, 3,
+            cwd, mode=0)
     if model_num == 0:
         model = UNet_model(train_batches, validation_batches, input_shape, output_classes, 
                             cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
@@ -57,12 +76,9 @@ if __name__ == '__main__':
                 model_num = int(currentValue)
             elif currentArgument in ("-e", "--epochs"):
                 EPOCHS = int(currentValue)
-                learn_r = 1e-3
+        learn_r = 1e-3
         main_train(model_num, EPOCHS, learn_r)
                 
     except getopt.error as err:
         # output error, and return with an error code
         print (str(err))
-
-
-    

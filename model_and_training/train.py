@@ -11,6 +11,7 @@ from utils.load_and_split_dataset import *
 from utils.instantiation_class import *
 from utils.image_proc_utils import *
 from utils.display_utils import *
+from utils.training_utils import *
 
 
 class mod_MeanIoU(tf.keras.metrics.MeanIoU):
@@ -137,9 +138,6 @@ class compile_and_train_model:
         To choose if we want to use Dense Unet alternative, 
         if set to False we can further choose from pixel DCNs.
         
-    cl_type: (Integer)
-        0 for normal convolution, 1 for ipixel convolution.
-        
     tcl_type:(Integer) 
         0 for Regular deconv, 1 for Pixel deconv, 2 for iPixel deconv.
         
@@ -247,21 +245,23 @@ class compile_and_train_model:
                     keras.callbacks.LearningRateScheduler(functools.partial(lr_scheduler,
                                                                             lr_init=learn_r,
                                                                             max_epochs=self.EPOCHS),
-                                                          verbose=1)] \
-                   if inKaggle else [DisplayCallback(image_list, self.model, self.model_name, self.cwd), 
+                                                          verbose=1),
+                    GarbageCollectorCallback()] \
+                   if inKaggle else [DisplayCallback(image_list, self.model, self.model_name, self.cwd),
                                      keras.callbacks.TensorBoard(log_dir=os.path.join(cwd,
-                                                                                      f'tensorboard', 
+                                                                                      f'tensorboard',
                                                                                       f'{self.model_name}',
-                                                                                      f'{timestamp}'), 
-                                     histogram_freq=1, 
-                                     write_graph=True, 
+                                                                                      f'{timestamp}'),
+                                     histogram_freq=1,
+                                     write_graph=True,
                                      write_images=True,
-                                     update_freq='epoch'), 
+                                     update_freq='epoch'),
                                      keras.callbacks.LearningRateScheduler(functools.partial(lr_scheduler,
                                                                                              lr_init=learn_r,
                                                                                              max_epochs=self.EPOCHS),
-                                                                           verbose=1)]
-        self.model_history = self.model.fit(self.train_batches, 
+                                                                           verbose=1),
+                                     GarbageCollectorCallback()]
+        self.model_history = self.model.fit(self.train_batches,
                                             epochs=self.EPOCHS,
                                             steps_per_epoch=self.STEPS_PER_EPOCH,
                                             validation_steps=self.VALIDATION_STEPS,

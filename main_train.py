@@ -35,9 +35,9 @@ def main_train(model_num, EPOCHS, learn_r):
     display('Dataset Sample', 'no_models', samples, 3,
             cwd, mode=0)
     if model_num == 0:
-        model = UNet_model(train_batches, validation_batches, input_shape, output_classes, 
-                            cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 
-                            VAL_SUBSPLITS, EPOCHS)
+        model = regularDenseNet(train_batches, validation_batches, input_shape, output_classes,
+                                cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH,
+                                VAL_SUBSPLITS, EPOCHS)
     elif model_num == 1:
         model = PixelDenseNet(train_batches, validation_batches, input_shape, output_classes,
                                 cwd, BATCH_SIZE, TRAIN_LENGTH, VAL_LENGTH, 

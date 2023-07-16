@@ -22,9 +22,6 @@ class modelClass:
         network_depth: (Integer)
             Depth of the Unet.
 
-        cl_type: (String) 
-            'builtin' for normal convolution, 'ipixel' for ipixel convolution.
-
         tcl_type: (String) 
             'builtin' for normal deconvolution, 'pixel' for pixel deconvolution,
             'ipixel' ipixel deconvolution.
@@ -35,7 +32,7 @@ class modelClass:
         filtersize: (Integer) 
             The number of filters/channels for the first layer of the Unet.
 
-       dense_layers: (List of integers) 
+        dense_layers: (List of integers) 
            The number of dense layers in the denseblock in the Unet
            at the depth corresponding to the list index.
 
@@ -121,10 +118,10 @@ class modelClass:
                                conv_option, d_format='NHWC')(inputs)
         return convt
 
-    def down_block_pixel(self, inputs, down_outputs, kernel_size_d,
-                         kernel_size_d2, channel_axis, dense_layers, layer_index,
-                         growth_rate, dropout, conv_option, pool_option, 
-                         pyramid_layers, isFinal=False):
+    def down_block_dense(self, inputs, down_outputs, kernel_size_d,
+                         channel_axis, dense_layers, layer_index, growth_rate,
+                         dropout, conv_option, pool_option,  pyramid_layers, 
+                         isFinal=False):
         """
         *****************
         *** Arguments ***
@@ -134,11 +131,8 @@ class modelClass:
             The list of tensors that contains all the downsampled inputs, which are to be 
             concatenated to the processed input tensor in the up block.
 
-        kernel_size_u: (Tuple)
+        kernel_size_d: (Tuple)
             The kernel size used for convolutions and deconvolutions.
-
-        kernel_size_d2: (Tuple) 
-            The kernel size used for convolutions and deconvolutions for ipixelcl.
             
         ***************
         *** Returns ***
@@ -180,7 +174,7 @@ class modelClass:
             layer_out = BatchActivate()(layer_out)
         return layer_out
 
-    def up_block_pixel(self, inputs, down_outputs, kernel_size_u, 
+    def up_block_dense(self, inputs, down_outputs, kernel_size_u, 
                        kernel_size_u2, channel_axis, out_classnum, tcl_type, 
                        dense_layers, layer_index, growth_rate, dropout,
                        conv_option, isFinal=False):
@@ -234,9 +228,9 @@ class modelClass:
         return layer_out
     
     def down_block_regular(self, inputs, down_outputs, kernel_size_d, 
-                           kernel_size_d2, channel_axis, dense_layers, layer_index, 
-                           growth_rate, dropout, conv_option, pool_option, 
-                           pyramid_layers, isFinal=False):
+                           channel_axis, dense_layers, layer_index, growth_rate, 
+                           dropout, conv_option, pool_option, pyramid_layers,
+                           isFinal=False):
         """
         *****************
         *** Arguments ***
@@ -246,11 +240,9 @@ class modelClass:
             The list of tensors that contains all the downsampled inputs, which are to be 
             concatenated to the processed input tensor in the up block.
 
-        kernel_size_u: (Tuple)
+        kernel_size_d: (Tuple)
             The kernel size used for convolutions and deconvolutions.
 
-        kernel_size_d2: (Tuple) 
-            The kernel size used for convolutions and deconvolutions for ipixelcl.
             
         ***************
         *** Returns ***
@@ -345,7 +337,7 @@ class modelClass:
         *** Returns ***
         ***************
 
-        pixeldenseunet: (tf.keras.Model object)
+        denseunet: (tf.keras.Model object)
             The model object for further compilation and training.
         """
         inputs = tf.keras.Input(shape=self.input_shape)
@@ -363,25 +355,23 @@ class modelClass:
         outputs = BatchNorm(outputs)
         for layer_index in range(self.network_depth):  
             isFinal = False if layer_index != self.network_depth-1 else True
-            if select=="regular_UNet":
+            if select=="regularUNet":
                 outputs = self.down_block_regular(outputs, down_outputs, 
-                                                  kernel_size_d, kernel_size_d2,
-                                                  channel_axis, self.dense_layers, 
-                                                  layer_index, self.growth_rate, 
-                                                  self.dropout, self.conv_option,
-                                                  self.pool_option, self.pyramid_layers,
-                                                  isFinal=isFinal)
-            elif select=="pixeldense":
-                outputs = self.down_block_pixel(outputs, down_outputs, 
-                                                kernel_size_d, kernel_size_d2,
-                                                channel_axis, self.dense_layers, 
-                                                layer_index, self.growth_rate, 
-                                                self.dropout, self.conv_option,
-                                                self.pool_option, self.pyramid_layers,
-                                                isFinal=isFinal)
+                                                kernel_size_d, channel_axis, 
+                                                self.dense_layers, layer_index, 
+                                                self.growth_rate, self.dropout, 
+                                                self.conv_option, self.pool_option,
+                                                self.pyramid_layers, isFinal=isFinal)
+            elif select=="denseUNet":
+                outputs = self.down_block_dense(outputs, down_outputs, 
+                                                kernel_size_d, channel_axis, 
+                                                self.dense_layers, layer_index, 
+                                                self.growth_rate, self.dropout, 
+                                                self.conv_option, self.pool_option,
+                                                self.pyramid_layers, isFinal=isFinal)
         for layer_index in range(self.network_depth-2, -1, -1):
             isFinal = False if layer_index !=0 else True
-            if select=="regular_UNet":
+            if select=="regularUNet":
                 outputs = self.up_block_regular(outputs, down_outputs, 
                                                 kernel_size_u, kernel_size_u2,
                                                 channel_axis, self.out_classnum,
@@ -389,8 +379,8 @@ class modelClass:
                                                 layer_index, self.growth_rate,
                                                 self.dropout, self.conv_option,
                                                 isFinal=isFinal)
-            elif select=="pixeldense":
-                outputs = self.up_block_pixel(outputs, down_outputs, 
+            elif select=="denseUNet":
+                outputs = self.up_block_dense(outputs, down_outputs, 
                                               kernel_size_u, kernel_size_u2,
                                               channel_axis, self.out_classnum,
                                               self.tcl_type, self.dense_layers,
@@ -402,10 +392,10 @@ class modelClass:
                                 padding='same', 
                                 kernel_initializer='he_uniform')(outputs)
         outputs = layers.Softmax()(outputs)
-        if select=="regular_UNet":
-            name = 'regular_UNet'
-        elif select=="pixeldense":
-            name = "pixeldenseUNet"
+        if select=="regularUNet":
+            name = 'regularUNet'
+        elif select=="denseUNet":
+            name = "denseUNet"
         unet = tf.keras.Model(inputs=inputs, outputs=outputs, name=name)
         return unet
     
@@ -531,10 +521,10 @@ class modelClass:
         return deeplab
     
     def __call__(self, select_model):
-        if select_model=="pixeldense":
-            return self.UNet(select="pixeldense")
+        if select_model=="denseUNet":
+            return self.UNet(select="denseUNet")
         elif select_model=="regular_UNet":
-            return self.UNet(select="regular_UNet")
+            return self.UNet(select="regularUNet")
         elif select_model=="deeplab":
             return self.Deeplab(pretrained=False)
         elif select_model=="deeplab_pre":

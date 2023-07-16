@@ -278,7 +278,7 @@ class compile_and_train_model:
                      'iou':(train_iou, 'Training IOU',
                             val_iou, 'Validation IOU')}
         
-        plt.figure()
+        plt.figure(facecolor='white')
         for plot_num, (key, (train_plot, train_label, val_plot, val_label))\
         in enumerate(zip(plot_list.keys(), plot_list.values())):
             plt.subplot(len(plot_list), 1, plot_num+1)
@@ -307,7 +307,12 @@ class compile_and_train_model:
                          self.cwd, mode=1, num=3)
         self.train_model(image_list, cwd, learn_r)
         self.plot_train_results()
-        show_predictions('Predictions after training', self.model_name, image_list, self.model, 
+
+        model_num = '# no num in name'
+        for m in self.model_name:
+            if m.isdigit():
+                model_num = m
+        show_predictions(f'Predictions after training - Model {model_num}', self.model_name, image_list, self.model,
                          self.cwd, dataset=self.validation_batches, mode=2, num=3)
         # model_checkpt_path = os.path.join(cwd, f'model_details', f'saved_model', 
         #                                   f'{self.model_name}', f'saved_weights',
